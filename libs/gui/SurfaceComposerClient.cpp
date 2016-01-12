@@ -838,7 +838,7 @@ status_t ScreenshotClient::capture(
         uint32_t minLayerZ, uint32_t maxLayerZ, bool useIdentityTransform) {
     sp<ISurfaceComposer> s(ComposerService::getComposerService());
     if (s == NULL) return NO_INIT;
-#ifdef USE_MHEAP_SCREENSHOT
+#if defined(USE_MHEAP_SCREENSHOT) && !defined(HAWAII_HWC)
     int format = 0;
     producer->query(NATIVE_WINDOW_FORMAT,&format);
     if (format == PIXEL_FORMAT_RGBA_8888) {
