@@ -31,7 +31,6 @@
 #endif
 
 #include <cutils/log.h>
-#include <cutils/iosched_policy.h>
 #include <cutils/properties.h>
 
 #include <binder/IPCThreadState.h>
@@ -504,7 +503,6 @@ void SurfaceFlinger::init() {
 
     mEventControlThread = new EventControlThread(this);
     mEventControlThread->run("EventControl", PRIORITY_URGENT_DISPLAY);
-    android_set_rt_ioprio(mEventControlThread->getTid(), 1);
 
     // set a fake vsync period if there is no HWComposer
     if (mHwc->initCheck() != NO_ERROR) {
@@ -683,11 +681,7 @@ status_t SurfaceFlinger::getDisplayStats(const sp<IBinder>& display,
 }
 
 int SurfaceFlinger::getActiveConfig(const sp<IBinder>& display) {
-    sp<DisplayDevice> device(getDisplayDevice(display));
-    if (device != NULL) {
-        return device->getActiveConfig();
-    }
-    return BAD_VALUE;
+    return getDisplayDevice(display)->getActiveConfig();
 }
 
 void SurfaceFlinger::setActiveConfigInternal(const sp<DisplayDevice>& hw, int mode) {
@@ -3751,6 +3745,11 @@ status_t SurfaceFlinger::captureScreenImplLocked(
         bool useReadPixels)
 {
     ATRACE_CALL();
+	
+// Rotation artifact problems when useReadPixels is false
+#ifdef HAWAII_HWC
+    useReadPixels = true;
+#endif
 
     // get screen geometry
     const uint32_t hw_w = hw->getWidth();
