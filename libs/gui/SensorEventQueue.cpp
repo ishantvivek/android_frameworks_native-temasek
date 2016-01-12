@@ -130,8 +130,12 @@ status_t SensorEventQueue::disableSensor(Sensor const* sensor) const {
 
 status_t SensorEventQueue::enableSensor(int32_t handle, int32_t samplingPeriodUs,
                                         int maxBatchReportLatencyUs, int reservedFlags) const {
-    return mSensorEventConnection->enableDisable(handle, true, us2ns(samplingPeriodUs),
-                                                 us2ns(maxBatchReportLatencyUs), reservedFlags);
+    status_t err = mSensorEventConnection->enableDisable(handle, true, us2ns(samplingPeriodUs),
+                                                 us2ns(maxBatchReportLatencyUs), reservedFlags);											 
+	if (err == NO_ERROR) {
+        mSensorEventConnection->setEventRate(handle, us2ns(samplingPeriodUs));
+    }
+    return err;											 
 }
 
 status_t SensorEventQueue::flush() const {
@@ -167,4 +171,3 @@ void SensorEventQueue::sendAck(const ASensorEvent* events, int count) {
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-
