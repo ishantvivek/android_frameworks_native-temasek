@@ -204,7 +204,12 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
             const int newUndequeuedCount =
                 maxBufferCount - (dequeuedCount + 1);
             const int minUndequeuedCount =
+#ifdef HAWAII_HWC
+                // HACK: for some reason, we need to reduce min undequeue for screen recording
+                mCore->getMinUndequeuedBufferCountLocked(false);
+#else			
                 mCore->getMinUndequeuedBufferCountLocked(async);
+#endif			
             if (newUndequeuedCount < minUndequeuedCount) {
                 BQ_LOGE("%s: min undequeued buffer count (%d) exceeded "
                         "(dequeued=%d undequeued=%d)",
